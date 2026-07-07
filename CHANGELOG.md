@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-07-07 - agent change recording and push confirmation policy
+
+### Changed
+- Added explicit Agent rules requiring `CHANGELOG.md` updates for every material repository change.
+- Added explicit Agent rules requiring user confirmation before any remote push.
+- Clarified that edit or commit approval is not push approval.
+- This round updates documentation and process contract only; it does not enter implementation.
+
+### Files
+- `AGENTS.md`
+- `CHANGELOG.md`
+
+### Decisions
+- Keep the rule in root `AGENTS.md` because it is the first repository-level instruction file for future agents.
+- Require pre-push summaries to include branch, commit id, changed files, verification performed, and changelog status.
+- Require current-turn confirmation for each push, rather than relying on prior approval.
+
+### Open Questions
+- Whether to add a local pre-push hook later to mechanically block pushes without confirmation notes.
+- Whether to add a reviewer checklist or CI rule for changelog coverage.
+
+### Next
+- Commit this rule change locally.
+- Wait for user confirmation before pushing the commit to GitHub.
+
 ## 2026-07-07 - public repository bootstrap
 
 ### Changed
