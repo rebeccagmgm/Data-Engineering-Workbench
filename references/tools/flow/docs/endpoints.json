@@ -1,0 +1,37 @@
+{
+  "domain": "flow.gf.com.cn",
+  "auth": {
+    "strategy": "cookie",
+    "description": "复用 Chrome 中已登录的 IOA 会话 Cookie，从 document.cookie 提取 bpm-access-token",
+    "env_override": {
+      "BPM_TOKEN": "Bearer token，设置后跳过 Chrome cookie（无浏览器环境用）",
+      "BPM_BASIC_AUTH": "覆盖默认 Basic auth 头",
+      "BPM_FETCH_TIMEOUT": "API 超时(ms)，默认 15000"
+    }
+  },
+  "base_urls": {
+    "home": "https://flow.gf.com.cn/flow-center/bpm/#/workbench",
+    "document_open": "https://flow.gf.com.cn/bpm/document/open/{docid}",
+    "api_ora": "https://flow.gf.com.cn/flow-center/api-ora/bpm",
+    "api_api": "https://flow.gf.com.cn/flow-center/api/bpm"
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/flow-center/api-ora/bpm/workbench/queryDocumentData",
+      "used_by": ["todo", "toread", "done", "read", "apply", "draft", "follow", "circulation", "search"],
+      "params": ["criteria", "page", "size", "queryType", "t", "_"],
+      "note": "8 视图通用查询，queryType 区分视图；search 命令并发 8 个 queryType"
+    },
+    {
+      "method": "GET",
+      "path": "/bpm/document/open/{docid}",
+      "used_by": ["detail"],
+      "note": "UI 模式，打开文档页解析 DOM，非 API 调用"
+    }
+  ],
+  "row_shape": {
+    "rule": "nesting depth <= 1",
+    "note": "detail 命令的 flowLog 已扁平化为字符串数组（'step | handlers | startTime→endTime | opinion'），不再用对象数组"
+  }
+}

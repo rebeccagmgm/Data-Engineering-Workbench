@@ -1,0 +1,78 @@
+case_id: CASE-20260611-jinshida-market-push
+title: 金仕达行情数据推送
+mode: historical_replay
+status: active
+phase: replay
+owner: user
+created_at: 2026-07-06T00:00:00+08:00
+updated_at: 2026-07-06T00:00:00+08:00
+
+source_root: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达
+
+current_conclusion:
+  summary: 该历史需求材料完整，适合作为 Case Workbench 首个回放样本；主线是金仕达行情数据推送，关键演化为 CDR 总股本批次从拟新增 1730h 批次转为实际使用 201969 h16 批次。
+  claim_refs: [C-001, C-002, C-003, C-004]
+
+current_focus:
+  card_ref: T-001
+  reason: 先核验核心数据源批次演化，验证 Claim/Evidence/Card 边界是否清楚。
+
+current_blocker:
+  card_ref: B-001
+  summary: 这是历史回放 Case，不做实时平台写入；部分结论来自历史核验报告，若要作为当前事实需重新读回。
+
+next_action:
+  summary: 继续补齐 evidence metadata，并用 6-8 张卡完成第一轮回放。
+  card_ref: T-001
+
+claims:
+  - claim_id: C-001
+    statement: 金仕达需要 A 股和存托凭证的成交额、总股本、上市日期等字段，推送到 manage.MD_STOCK_DAILY_MARKET。
+    status: trusted
+    source_refs: [SRC-chat-jinshida, SRC-analysis]
+    evidence_refs: [EV-20260611-analysis]
+    last_confirmed_at: 2026-06-11T00:00:00+08:00
+    expires_at:
+  - claim_id: C-002
+    statement: 早期方案认为 CDR 总股本 17:30 推送需要新增 t02_stk_valu_idx_pb 的 1730h 批次。
+    status: stale
+    source_refs: [SRC-analysis, SRC-atomic-pb]
+    evidence_refs: [EV-20260611-analysis, EV-20260611-atomic-pb]
+    last_confirmed_at: 2026-06-11T00:00:00+08:00
+    expires_at: 2026-06-17T00:00:00+08:00
+  - claim_id: C-003
+    statement: 后续实际逻辑确认可直接使用 201969 h16 批次，238523 从原表 t02_stk_valu_idx 的 grp_id='07' 分区读取即可，无需新增 t02_stk_valu_idx_pb。
+    status: trusted
+    source_refs: [SRC-prod-verify, SRC-actual-logic]
+    evidence_refs: [EV-20260622-prod-verify, EV-20260625-actual-logic]
+    last_confirmed_at: 2026-06-25T00:00:00+08:00
+    expires_at:
+  - claim_id: C-004
+    statement: 历史核验时加工任务 238523 已在 DM_OTC_TEST 跑通，但推送任务 238824 从未运行，目标表 TOTAL_SHARE_CAP 字段缺失曾阻塞端到端打通。
+    status: trusted
+    source_refs: [SRC-prod-verify, SRC-actual-logic]
+    evidence_refs: [EV-20260622-prod-verify, EV-20260625-actual-logic]
+    last_confirmed_at: 2026-06-25T00:00:00+08:00
+    expires_at:
+  - claim_id: C-005
+    statement: 该 Case 适合作为 historical_replay，能测试 Claim 过期、卡片作废、证据反转和 closeout 收口。
+    status: candidate
+    source_refs: [SRC-case-selection]
+    evidence_refs: []
+    last_confirmed_at:
+    expires_at:
+
+open_card_refs: [T-001, T-002, T-003, T-004, T-005, B-001, Q-001, D-001]
+asset_refs:
+  - table:dm_otc_test.md_stock_daily_market
+  - table:dm_otc_n.md_stock_daily_market
+  - table:manage.MD_STOCK_DAILY_MARKET
+  - table:pdata_news_n.t02_stk_valu_idx
+  - table:pdata_news_n.t02_exch_quot_s
+  - table:pdata_news_n.t02_stk_base_info
+run_refs:
+  - horae:238523
+  - horae:238824
+  - horae:238941
+  - horae:238963
+  - horae:201969

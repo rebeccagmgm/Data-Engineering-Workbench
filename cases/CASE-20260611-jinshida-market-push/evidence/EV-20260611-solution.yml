@@ -1,0 +1,19 @@
+evidence_id: EV-20260611-solution
+kind: plan
+title: 金仕达行情推送实现方案
+observed_at: 2026-06-11T00:00:00+08:00
+environment: historical
+source: local markdown
+artifact_path: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达\02-实现方案\01-推送方案与SQL.md
+supports:
+  claim_refs: [C-001, C-002]
+  card_refs: [T-002, T-003, T-005]
+summary: 记录初始方案：sparkIndex 加工到 dm_otc_n 宽表，再通过 hive2oracle 推送 manage 目标表。
+limitations:
+  - 这是方案，不是实际运行读回。
+  - 后续实际逻辑与核验报告中有多处修正。
+asset_refs:
+  - table:dm_otc_n.md_stock_daily_market
+  - table:manage.MD_STOCK_DAILY_MARKET
+run_refs: []
+recorded_by: agent

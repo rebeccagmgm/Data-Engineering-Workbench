@@ -1,0 +1,19 @@
+evidence_id: EV-20260611-atomic-pb
+kind: atomic_note
+title: t02_stk_valu_idx_pb 批次表原子笔记
+observed_at: 2026-06-11T00:00:00+08:00
+environment: historical
+source: local markdown
+artifact_path: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达\原子笔记\t02_stk_valu_idx_pb 批次表.md
+supports:
+  claim_refs: [C-002]
+  card_refs: [T-001]
+summary: 记录早期关于新建 t02_stk_valu_idx_pb 1730h 批次表的设想和影响。
+limitations:
+  - 后续实际逻辑确认该路线作废，当前仅作为 stale Claim 的来源证据。
+asset_refs:
+  - table:pdata_news_n.t02_stk_valu_idx_pb
+  - table:pdata_news_n.t02_stk_valu_idx
+run_refs:
+  - horae:70346
+recorded_by: agent

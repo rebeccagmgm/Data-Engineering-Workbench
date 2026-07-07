@@ -1,0 +1,37 @@
+# Local runtime state
+tmp/
+_archive/
+.headroom-cache/
+backups/
+_browser_state.txt
+*.trace
+*.log
+
+# Local probes and scratch files
+_tmp_*
+({text}))
+
+# Secrets and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependency and build outputs
+node_modules/
+dist/
+build/
+coverage/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/

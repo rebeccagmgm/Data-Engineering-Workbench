@@ -1,0 +1,24 @@
+evidence_id: EV-20260625-actual-logic
+kind: implementation_note
+title: 金仕达行情推送实际加工推送逻辑
+observed_at: 2026-06-25T00:00:00+08:00
+environment: historical
+source: local markdown
+artifact_path: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达\03-实际上线情况\02-实际开发逻辑.md
+supports:
+  claim_refs: [C-003, C-004]
+  card_refs: [T-001, T-002, T-003, T-004, T-005, D-001]
+summary: 记录实际加工 SQL、推送配置、升级状态、负责人视角下的阻塞项和已确认差异；确认 201969 h16 批次路径。
+limitations:
+  - 这是 2026-06-25 的历史状态整理。
+  - 若要作为当前结论，需要重新查 Horae 和目标库。
+asset_refs:
+  - table:dm_otc_test.md_stock_daily_market
+  - table:dm_otc_n.md_stock_daily_market
+  - table:manage.MD_STOCK_DAILY_MARKET
+  - table:pdata_news_n.t02_stk_valu_idx
+run_refs:
+  - horae:238523
+  - horae:238824
+  - horae:201969
+recorded_by: agent

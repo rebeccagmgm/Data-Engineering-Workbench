@@ -1,0 +1,4 @@
+{"id":"t01","query":"查一下我的待办流程有哪些","should_trigger":true,"tags":["explicit"]}
+{"id":"t02","query":"帮我搜一下权限申请相关的流程","should_trigger":true,"tags":["implicit"]}
+{"id":"t03","query":"帮我写一个 Python 脚本读取 CSV 文件","should_trigger":false,"tags":["near-miss"]}
+{"id":"t04","query":"审批这个流程","should_trigger":false,"tags":["near-miss"]}

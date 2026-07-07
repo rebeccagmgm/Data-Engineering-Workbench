@@ -1,0 +1,26 @@
+evidence_id: EV-20260622-prod-verify
+kind: verification_report
+title: 金仕达行情推送上线核验报告
+observed_at: 2026-06-22T00:00:00+08:00
+environment: historical
+source: local markdown
+artifact_path: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达\03-实际上线情况\01-上线核验报告.md
+supports:
+  claim_refs: [C-003, C-004]
+  card_refs: [T-001, T-002, T-003, T-004, T-005, D-001]
+summary: 核验实际任务、运行日志、血缘、目标表字段和上线前缺口；确认 238523 加工测试态跑通，238824/238963 推送未运行，目标表缺 TOTAL_SHARE_CAP。
+limitations:
+  - 核验时间为 2026-06-22，不能代表当前平台状态。
+  - 测试环境 manage 数据仅供结构/格式核验，不能作为生产业务结论。
+asset_refs:
+  - table:dm_otc_test.md_stock_daily_market
+  - table:dm_otc_n.md_stock_daily_market
+  - table:manage.MD_STOCK_DAILY_MARKET
+  - table:pdata_news_n.t02_stk_valu_idx
+run_refs:
+  - horae:238523
+  - horae:238824
+  - horae:238941
+  - horae:238963
+  - horae:201969
+recorded_by: agent
