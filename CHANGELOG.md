@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-07-07 - case dashboard generator v0
+
+### Changed
+- Added a local read-only case-dashboard-generator script that derives dashboard state from cases/* source files.
+- Added unittest coverage for the Jinshida replay sample to verify attention lanes, Top Risks before Top Actions, and local-only HTML output markers.
+- Added a Superpowers implementation plan for the dashboard generator.
+- Generated a disposable local dashboard at tmp/case-dashboard/index.html; this output remains ignored and is not a source of truth.
+- This round adds local generator code, tests, and documentation only; it does not execute platform writes, add a server, create an editable UI, or store credentials.
+
+### Files
+- scripts/case_dashboard_generator.py
+- tests/test_case_dashboard_generator.py
+- docs/superpowers/plans/2026-07-07-case-dashboard-generator.md
+- tmp/case-dashboard/index.html (generated, ignored)
+- CHANGELOG.md
+
+### Decisions
+- Keep the first dashboard as static generated HTML instead of a React/Vite application.
+- Keep cases/ Markdown/YAML files as the only durable source of truth.
+- Use PyYAML plus Python unittest to avoid adding a frontend build stack for V0.
+- Surface failed verification and trust risks before action prompts.
+
+### Open Questions
+- Which additional 1-2 Cases should join the first two-week dashboard trial.
+- Whether claim_scope.truth_environment should be backfilled into existing sample claims before broadening trust-gap checks.
+- Whether later versions should add a JSON cache beside the HTML output.
+
+### Next
+- Open the generated HTML locally during daily work and decide whether it exposes the next action faster than reading raw Case files.
+- Add more Case samples before expanding UI surface area.
+- Revisit the Dashboard kill criteria after the first trial period.
+
 ## 2026-07-07 - agent change recording and push confirmation policy
 
 ### Changed
