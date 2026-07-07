@@ -3,6 +3,7 @@ kind: plan
 title: 金仕达行情推送实现方案
 observed_at: 2026-06-11T00:00:00+08:00
 environment: historical
+truth_environment: historical
 source: local markdown
 artifact_path: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达\02-实现方案\01-推送方案与SQL.md
 supports:
@@ -12,6 +13,14 @@ summary: 记录初始方案：sparkIndex 加工到 dm_otc_n 宽表，再通过 h
 limitations:
   - 这是方案，不是实际运行读回。
   - 后续实际逻辑与核验报告中有多处修正。
+consumer_view: historical local implementation plan
+evidence_scope:
+  proves:
+    - 2026-06-11 历史实现方案中记录的初始加工和推送设计。
+  does_not_prove:
+    - 实际任务已运行。
+    - 当前生产目标表状态。
+    - 当前下游实际可见数据。
 asset_refs:
   - table:dm_otc_n.md_stock_daily_market
   - table:manage.MD_STOCK_DAILY_MARKET

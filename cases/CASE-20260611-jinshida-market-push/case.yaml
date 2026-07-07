@@ -33,6 +33,11 @@ claims:
     evidence_refs: [EV-20260611-analysis]
     last_confirmed_at: 2026-06-11T00:00:00+08:00
     expires_at:
+    claim_scope:
+      truth_environment: historical
+      time_scope:
+        observed_at: 2026-06-11T00:00:00+08:00
+      notes: historical_replay only; not current platform truth
   - claim_id: C-002
     statement: 早期方案认为 CDR 总股本 17:30 推送需要新增 t02_stk_valu_idx_pb 的 1730h 批次。
     status: stale
@@ -40,6 +45,12 @@ claims:
     evidence_refs: [EV-20260611-analysis, EV-20260611-atomic-pb]
     last_confirmed_at: 2026-06-11T00:00:00+08:00
     expires_at: 2026-06-17T00:00:00+08:00
+    claim_scope:
+      truth_environment: historical
+      time_scope:
+        observed_at: 2026-06-11T00:00:00+08:00
+        expired_at: 2026-06-17T00:00:00+08:00
+      notes: stale historical plan; retained to test claim invalidation
   - claim_id: C-003
     statement: 后续实际逻辑确认可直接使用 201969 h16 批次，238523 从原表 t02_stk_valu_idx 的 grp_id='07' 分区读取即可，无需新增 t02_stk_valu_idx_pb。
     status: trusted
@@ -47,6 +58,11 @@ claims:
     evidence_refs: [EV-20260622-prod-verify, EV-20260625-actual-logic]
     last_confirmed_at: 2026-06-25T00:00:00+08:00
     expires_at:
+    claim_scope:
+      truth_environment: historical
+      time_scope:
+        observed_at: 2026-06-25T00:00:00+08:00
+      notes: historical_replay trusted claim; current platform truth requires fresh readback
   - claim_id: C-004
     statement: 历史核验时加工任务 238523 已在 DM_OTC_TEST 跑通，但推送任务 238824 从未运行，目标表 TOTAL_SHARE_CAP 字段缺失曾阻塞端到端打通。
     status: trusted
@@ -54,6 +70,11 @@ claims:
     evidence_refs: [EV-20260622-prod-verify, EV-20260625-actual-logic]
     last_confirmed_at: 2026-06-25T00:00:00+08:00
     expires_at:
+    claim_scope:
+      truth_environment: historical
+      time_scope:
+        observed_at: 2026-06-25T00:00:00+08:00
+      notes: historical replay finding; not current production or downstream-visible truth
   - claim_id: C-005
     statement: 该 Case 适合作为 historical_replay，能测试 Claim 过期、卡片作废、证据反转和 closeout 收口。
     status: candidate
@@ -61,6 +82,11 @@ claims:
     evidence_refs: []
     last_confirmed_at:
     expires_at:
+    claim_scope:
+      truth_environment: historical
+      time_scope:
+        observed_at: 2026-07-06T00:00:00+08:00
+      notes: case-selection judgment for replay design; not a platform fact
 
 open_card_refs: [T-001, T-002, T-003, T-004, T-005, B-001, Q-001, D-001]
 asset_refs:

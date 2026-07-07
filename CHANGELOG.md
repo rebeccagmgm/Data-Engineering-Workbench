@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-07-07 - dashboard source format hardening
+
+### Changed
+- Hardened the Jinshida Dashboard source metadata after parser-readability review.
+- Added `claim_scope.truth_environment` and time-scope notes to all Jinshida replay claims.
+- Added `truth_environment`, `consumer_view`, and explicit `evidence_scope.proves` / `evidence_scope.does_not_prove` fields to all Jinshida evidence sidecars.
+- This round hardens source readability only; it does not add dashboard implementation code, frontend scaffolding, generated output, or production platform actions.
+
+### Files
+- `cases/CASE-20260611-jinshida-market-push/case.yaml`
+- `cases/CASE-20260611-jinshida-market-push/evidence/*.yml`
+- `CHANGELOG.md`
+
+### Decisions
+- Treat the Jinshida sample as historical replay material only.
+- Do not infer production or downstream truth from claim statements.
+- Keep stale claim `C-002` in `current_conclusion.claim_refs` so the dashboard can surface it as an expected historical replay risk.
+
+### Open Questions
+- Whether to add a dedicated schema/lint command after source formatting is stable.
+- Whether additional sample Cases should be normalized before expanding dashboard logic.
+
+### Next
+- Keep parser validation across Case YAML, card frontmatter, evidence sidecars, and Markdown line-break checks as the gate before further dashboard generator work.
+
 ## 2026-07-07 - case dashboard generator v0
 
 ### Changed

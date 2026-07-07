@@ -3,6 +3,7 @@ kind: atomic_note
 title: t02_stk_valu_idx_pb 批次表原子笔记
 observed_at: 2026-06-11T00:00:00+08:00
 environment: historical
+truth_environment: historical
 source: local markdown
 artifact_path: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达\原子笔记\t02_stk_valu_idx_pb 批次表.md
 supports:
@@ -11,6 +12,14 @@ supports:
 summary: 记录早期关于新建 t02_stk_valu_idx_pb 1730h 批次表的设想和影响。
 limitations:
   - 后续实际逻辑确认该路线作废，当前仅作为 stale Claim 的来源证据。
+consumer_view: historical local atomic note
+evidence_scope:
+  proves:
+    - 2026-06-11 早期关于新增 t02_stk_valu_idx_pb 1730h 批次表的设想。
+  does_not_prove:
+    - 该 pb 批次路线最终被采用。
+    - 当前 Horae 状态。
+    - 当前生产或下游实际状态。
 asset_refs:
   - table:pdata_news_n.t02_stk_valu_idx_pb
   - table:pdata_news_n.t02_stk_valu_idx

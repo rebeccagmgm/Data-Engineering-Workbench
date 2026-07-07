@@ -3,6 +3,7 @@ kind: analysis
 title: 金仕达 A股行情数据推送需求分析
 observed_at: 2026-06-11T00:00:00+08:00
 environment: historical
+truth_environment: historical
 source: local markdown
 artifact_path: E:\02_area\数据开发-笔记本\raw\开发工作\数据开发\股衍\20260611-资讯-金仕达\01-需求分析\01-金仕达A股行情数据推送.md
 supports:
@@ -12,6 +13,14 @@ summary: 记录金仕达推送目标字段、源表、grp_id 差异、CDR 总股
 limitations:
   - 属于当时需求分析，不代表最终实际执行状态。
   - 与后续实际上线情况冲突时，以后续核验材料为准。
+consumer_view: historical local requirement analysis
+evidence_scope:
+  proves:
+    - 2026-06-11 历史需求分析材料记录的目标字段、候选源表和早期待办。
+  does_not_prove:
+    - 当前 Horae 状态。
+    - 当前生产目标表状态。
+    - 当前下游实际可见数据。
 asset_refs:
   - table:manage.MD_STOCK_DAILY_MARKET
   - table:pdata_news_n.t02_stk_valu_idx
