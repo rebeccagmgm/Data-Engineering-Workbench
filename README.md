@@ -12,6 +12,8 @@ code or the live business systems.
 
 - `AGENTS.md`: project rules, environment boundaries, search hygiene, and
   documentation rules.
+- `CHANGELOG.md`: concise record of repository changes, decisions, open
+  questions, and next steps.
 - `CONTEXT.md`: the shared language for the Case Workbench model.
 - `skills/data-engineering-investigation/SKILL.md`: compact skill entrypoint
   for agents.

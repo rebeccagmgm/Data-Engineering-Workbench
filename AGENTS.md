@@ -92,6 +92,8 @@ skills/data-engineering-investigation/SKILL.md
 
 Operation-specific behavior belongs in `references/tools/szdata-operations/`. Keep persistent rules in docs, not only in chat prompts.
 
+Maintain root `CHANGELOG.md` for every material repository change. Any document, schema, contract, Case example, or directory-structure change must update `CHANGELOG.md` in the same delivery. Changelog entries must record real changes only and include date, change phase, summary, files, key decisions, open questions, and next steps. Do not record sensitive internal details, real accounts, cookies, tokens, or production connection details. Reviewers should treat obvious changed files without a matching changelog update as incomplete delivery.
+
 ## Encoding And Mojibake Hygiene
 
 - Treat common Chinese mojibake marker characters, including Unicode code points `U+951B`, `U+9286`, `U+95AB`, `U+935B`, `U+93C1`, `U+4E63`, and replacement character `U+FFFD`, as file content corruption, not a display glitch.
