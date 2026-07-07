@@ -1,138 +1,118 @@
-# SZData CLI 命令总账
+# SZData CLI Command Landscape
 
-更新时间：2026-07-06
+Updated: 2026-07-07
 
-这份文档是 `szdata` / `szdata_detail` / `szdatatest` / `szdatatest_detail` / `archive` 的全局命令地图。它不替代每个命令的 `--help`，只回答三件事：命令属于哪个任务域、什么时候选、不该拿它做什么。
+This is the global command ledger for `szdata`, `szdata_detail`, `szdatatest`, `szdatatest_detail`, and archived surfaces. It does not replace per-command `--help`; it answers where a command belongs, when to choose it, and what it must not be used to prove.
 
-## 总原则
+## Principles
 
-- 高频生产只读主流程放 `szdata`。
-- 测试验证、写前解析、测试写入链路放 `szdatatest`。
-- 低频诊断、审计、解释、历史、日志、调度配置读回放 `szdata_detail`。
-- 测试环境低频诊断镜像放 `szdatatest_detail`，命令清单必须与 `szdata_detail` 一致。
-- `szdatatest` 与 `szdata` 重名的命令是测试环境主流程镜像，参数、默认输出和语义必须保持一致；不重叠的 `szdatatest` 命令表示仍处于测试验证期，不能当作生产稳定入口。
-- 已替代、慢、容易误导、主体不清的旧入口放 `archive` 或直接拒绝。
-- 同一任务族使用同一前缀，主体或维度放后缀，例如 `table-permission-mine/topic/role`。
-- 主入口默认输出名片和结论摘要；长 SQL、DDL、日志、人员、字段、raw 证据必须走专项命令或显式参数。
+- High-frequency production read-only workflows belong in `szdata`.
+- Test validation, field parsing, guards, and explicit test write probes belong in `szdatatest`.
+- Low-frequency diagnostics, audit, explanations, history, logs, and large detail surfaces belong in `szdata_detail`.
+- `szdatatest_detail` mirrors `szdata_detail` for test low-frequency diagnostics.
+- `szdatatest` commands with the same name as `szdata` commands must preserve argument shape, default output, and semantics.
+- Retired, slow, risky, or misleading commands belong in `archive` or are rejected as agent entrypoints.
+- Main commands default to compact summaries; long SQL, DDL, logs, person lists, field lists, and raw evidence require dedicated commands or explicit flags.
 
-## 入口边界
+## Surface Boundaries
 
-| 入口 | 定位 | 什么时候用 | 不该用它做什么 |
+| Surface | Role | Use it for | Do not use it for |
 | --- | --- | --- | --- |
-| `szdata` | 生产主工作流 | 找资产、核验表、查任务 SQL、读需求、读数据集/宽表、开发前置权限判断 | 默认不做生产写入；不放低频大对象诊断 |
-| `szdata_detail` | 低频诊断解释面 | 字典、SQL 历史、模板、个人/统计视图、角色成员、调度策略、宽表日志/调度配置 | 不承载写入；不承载开发前置主判断 |
-| `szdatatest` | 测试验证面 | 测试环境主流程镜像、字段解析、guard、宽表测试预览/生成/调度保存 | 不代表生产真实状态；独有命令表示仍在测试；测试写入也要显式 `--execute` 和确认 |
-| `szdatatest_detail` | 测试低频诊断解释面 | 测试环境字典、SQL 历史、模板、角色成员、调度策略、宽表日志/调度配置 | 不承载测试生命周期写命令；清单必须对齐 `szdata_detail` |
-| `archive` | 退役和风险命令 | 仅保留历史实现或排查资料 | 不作为 agent 可选入口 |
+| `szdata` | Production main workflow | Asset discovery, table verification, task SQL, schedule readback, demand readback, dataset/wide-table readback, pre-development permission checks | Default production writes, low-frequency large diagnostics |
+| `szdata_detail` | Production diagnostic/detail surface | Dictionaries, SQL history, templates, personal views, role members, scheduling policy, wide-table logs/config detail | Writes or primary pre-development decisions |
+| `szdatatest` | Test validation surface | Test mirrors, field parsing, guards, explicit test lifecycle probes | Production truth or unstated writes |
+| `szdatatest_detail` | Test diagnostic/detail mirror | Test dictionaries, SQL history, templates, role members, scheduling policy, wide-table logs/config detail | Test lifecycle writes |
+| `archive` | Retired/risky history | Historical source for old implementations | Agent-selected active workflows |
 
-实现说明：`szdata_detail` / `szdatatest_detail` 是普通 OpenCLI site wrapper，root `.js` 只绑定 surface 并引用共享 core 中对应环境的只读实现。低频/detail 命令不应再出现在 `opencli szdata --help` 或 `opencli szdatatest --help`。共享 core 在 `C:\Users\13246\.opencli\shared\szdata-core\commands\`，一致性审计脚本为 `audit-surfaces.mjs`。
+Shared implementation lives under `C:\Users\13246\.opencli\shared\szdata-core\commands\`. Run the consistency audit with:
 
-## 6 个主任务域
+```text
+node C:\Users\13246\.opencli\shared\szdata-core\audit-surfaces.mjs --plain
+```
 
-| 任务域 | 用户问题 | 主入口 | 深化/低频入口 | 不推荐/归档 | 定位 |
+## Task Domains
+
+| Domain | User question | Main entrypoints | Detail/low-frequency | Avoid/archive | Boundary |
 | --- | --- | --- | --- | --- | --- |
-| 1. 数据资产发现 | 我知道关键词/库表，怎么找到资产？ | `table` / `table-search` | `table-guid` / `table-detail` / `table-ddl` / `table-lineage` / `table-sample` | 旧名 `dms` / `guid` / `table-info` / `sample` / `lineage` | 找表、确认表、看结构/血缘/样例 |
-| 2. 任务、需求、子任务 | 我知道任务号、需求或子任务，怎么读现状、拿 SQL 证据、授权后写子任务？ | `task-sql` / `demand-list` / `demand-detail` | `demand-subtask-list` / `demand-subtask-detail` / `demand-mine` / `demand-stats` | `etl-sql` | 读任务 SQL、需求详情、子任务现状；授权后创建/修改子任务 |
-| 3. 权限与主体诊断 | 当前用户/主题/角色能不能读目标表？角色是什么、有哪些成员、有哪些可选主题？ | `table-permission-mine` / `table-permission-topic` / `table-permission-role` | `role-list` / `role-user-list` / `scheduling-topic-list-by-current-user` / `scheduling-topic-base-policy` | `current-user-data-permission` / `my-permission-base` / `my-permission-data` / `my-permission-function` / `my-permission-report` / `role-data-permission` / `role-summary` / `scheduling-topic-table-check` / `table-permission-check` | 主体是谁、能不能读表、主题基础策略是什么 |
-| 4. 数据集读回与测试配置 | 数据集配置、SQL、字段、模板、字典怎么读？ | `dataset-config` | `dataset-config-dict` / `dataset-sql-versions` / `dataset-templates` / `dataset-indicator-sql` | - | 生产只读确认；测试环境承担字段解析和写前 guard |
-| 5. 宽表管理 | 宽表、生成详情、状态、日志、调度配置怎么读？ | `widetable` / `widetable-detail` | `widetable-explain` / `widetable-action-log` / `widetable-schedule-config` / `widetable-schedule-detail` | 历史 config-save probe | 宽表状态、详情、调度配置、测试预览/生成/调度保存 |
-| 6. 支撑入口 | 怎么登录、查帮助中心？ | `login` | `portal-help` | - | 只辅助会话和帮助检索，不代表业务验证成功 |
+| 1. Data asset discovery | I know a keyword, GUID, or `db.table`; how do I find or verify the asset? | `table`, `table-search`, `table-guid`, `table-detail`, `table-ddl`, `table-lineage`, `table-sample`, `indicator`, `tagdim` | - | Old aliases such as `dms`, `guid`, `table-info`, `sample`, `lineage` | Find tables, verify structure, DDL, lineage, and bounded sample evidence. |
+| 2. Task, demand, and schedule | I know a task id, demand, or subtask; how do I read current state, SQL, schedule config, dependencies, run states, or failed instances? | `task-sql`, `schedule-detail`, `schedule-mcp-dependencies`, `schedule-mcp-run-instances`, `schedule-mcp-run-states`, `schedule-mcp-owner-failed-instances`, `schedule-mcp-run-logs`, `demand-list`, `demand-detail` | `demand-subtask-list`, `demand-subtask-detail`, `demand-mine`, `demand-stats` | `etl-sql`; retired partial direct schedule runtime wrappers | Schedule runtime parity uses explicit MCP wrappers; full log bodies remain bounded by default. |
+| 3. Permission and subject diagnostics | Can the current user/topic/role read a target table? Who is in a role? Which topics are available? | `table-permission-mine`, `table-permission-topic`, `table-permission-role` | `role-list`, `role-user-list`, `scheduling-topic-list-by-current-user`, `scheduling-topic-base-policy` | `current-user-data-permission`, `my-permission-*`, `role-data-permission`, `role-summary`, `scheduling-topic-table-check`, `table-permission-check` | Final table-permission answers use `table-permission-*`; role/topic commands explain subjects and policies. |
+| 4. Dataset readback and test config | How do I read dataset config, SQL versions, templates, dictionaries, or parse fields before a write? | `dataset-config` | `dataset-config-dict`, `dataset-sql-versions`, `dataset-templates`, `dataset-indicator-sql` | - | Production readback stays compact; test parsing and guards stay in `szdatatest`. |
+| 5. Wide-table management | How do I read wide-table status, generated detail, logs, or schedule config? | `widetable`, `widetable-detail` | `widetable-explain`, `widetable-action-log`, `widetable-schedule-config`, `widetable-schedule-detail` | Historical config-save probes | Test preview/generate/schedule-save probes use explicit `wide-table-*-test` names. |
+| 6. Subtask write support | How do I find source systems or access points before gather/modeling subtask work? | `subtask-source-system-list`, `subtask-access-point-list`, `subtask-gather-create`, `subtask-gather-update`, `subtask-modeling-create` | - | Old `create-subtask`, `update-subtask`, `create-model-subtask`, `list-source-systems`, `list-access-points` | Write commands default to dry-run and require readback, test validation, and user authorization. |
+| 7. Support | How do I log in, search help, or run a bounded SQL check? | `login`, `sql-diagnosis` | `portal-help` | - | `sql-diagnosis` is a direct Data Portal risk/auth check, not exact MCP table-existence diagnosis parity. |
 
-任务、需求、子任务的写入/辅助命令统一归入第 2 域：
+## Data Asset Discovery
 
-| 命令 | 定位 | 什么时候选 | 边界 |
+| Command | Default output | Choose when | Does not answer |
 | --- | --- | --- | --- |
-| `subtask-source-system-list` | 源系统候选 | 建采集子任务前，先找源系统 | 只读；不创建子任务 |
-| `subtask-access-point-list` | 数据源候选 | 已知源系统，找 datasource/dbIdentifier | 只读；默认隐藏 host/port |
-| `subtask-gather-create` | 新建采集子任务 | 明确授权后新建采集子任务 | 默认 dry-run；生产写入前必须读现状、测试验证、用户授权 |
-| `subtask-gather-update` | 修改采集子任务 | 明确授权后修改采集子任务 | 不是读详情入口；先用 `demand-subtask-detail` |
-| `subtask-modeling-create` | 新建建模子任务 | 明确授权后新建建模类子任务 | 默认 dry-run；不替代需求/子任务读回 |
+| `table` | Compact identity, structure, ownership, tasks, lineage, sample note | Known `db.table`; need a quick asset card | Full DDL, full metadata tree, full lineage |
+| `table-search` | Candidate table metadata | Keyword, Chinese name, or business term only | Final table verification |
+| `table-guid` | GUID and identity bridge | Known `db.table`; next command requires GUID | Full answer to a business question |
+| `table-detail` | Flattened metadata detail | Known GUID; need ownership/status/source-task/permission summary | Sample rows or full lineage rows |
+| `table-ddl` | DDL and structural evidence | Need create-table statement, field types, partition evidence | Business-level validation |
+| `table-lineage` | Upstream/downstream lineage rows | Need lineage evidence | Quick table card |
+| `table-sample` | Bounded sample rows | Need a few rows for inspection | Reconciliation truth or full dataset proof |
 
-## 数据资产发现
+## Task, Demand, And Schedule
 
-| 命令 | 默认字段/输出形态 | 什么时候选 | 不回答什么 |
+| Command | Default output | Choose when | Does not answer |
 | --- | --- | --- | --- |
-| `table` | `identity` / `structure` / `ownership` / `tasks` / `lineage` / `sample` / `evidenceNote` | 已知 `db.table`，想快速确认表身份、结构摘要、负责人、任务、血缘预览 | 不返回完整 DDL、完整元数据、完整血缘 |
-| `table-search` | `guid` / `name` / `comment` / `typeName` / `metadataType` / `qualifiedName` / `dbName` / `dataSource` | 只知道关键词、中文名、业务词 | 不做最终表核验 |
-| `table-guid` | `guid` / `dbName` / `tableName` / `qualifiedName` / `comment` / `typeName` / `dataSource` / `resultLevel` | 已知 `db.table`，后续命令必须传 GUID | 通常不是用户问题的最终答案 |
-| `table-detail` | 完整扁平元数据字段 | 已知 GUID，要完整归属、状态、来源任务、权限摘要等 | 不负责抽样数据或完整血缘行表 |
-| `table-ddl` | `guid` / `qualifiedName` / `dbName` / `tableName` / `type` / `partition` / `ddl` | 明确要建表语句、字段类型、分区 | 不再拆冗余字段清单；DDL 本身就是证据 |
-| `table-lineage` | `id` / `typeName` / `name` / `direction` / `apiCode` / `appId` / `usernames` / `status` | 明确要上下游依赖证据 | 不替代 `table` 的快速核验 |
-| `table-sample` | 动态样例行字段，默认 10 行 | 明确要看少量样例 | 不作为资产发现主入口，不证明对账结果 |
+| `task-sql` | Task SQL evidence and limitations | Known Horae task id; need create/query SQL | Runtime success or data correctness |
+| `schedule-detail` | Schedule task card, cycle, owner summary, SQL preview | Known task id; need Data Portal schedule config | Runtime instances or full logs |
+| `schedule-mcp-dependencies` | Upstream/downstream dependency shape from MCP | Need schedule dependency parity | Direct Portal-only dependency proof |
+| `schedule-mcp-run-instances` | Runtime instances from MCP | Need run instance parity over a date range | Business-data correctness |
+| `schedule-mcp-run-states` | Runtime states from MCP | Need state history by task/date range | Business-data correctness |
+| `schedule-mcp-owner-failed-instances` | Owner/date failed-instance worklist from MCP | Need failed worklist by owner and data date | Full downstream remediation state |
+| `schedule-mcp-run-logs` | Runtime log metadata/counts/bounded previews from MCP | Need log availability and bounded log evidence | Printing complete log bodies by default |
+| `demand-list` | Demand candidates | Search demands by keyword/status/owner | Full demand content |
+| `demand-detail` | Demand detail | Known demand UUID; need current state | Create or advance a demand |
+| `demand-subtask-list` | Subtask list | Known demand UUID; need subtasks | Full single-subtask fields |
+| `demand-subtask-detail` | Subtask detail | Known subtask UUID; need source/data-source/status detail | Modify a subtask |
+| `demand-mine` | Personal demand view | Low-frequency personal view | Demand search main entrypoint |
+| `demand-stats` | Status statistics and top owners | Low-frequency stats view | Single-demand truth |
 
-选择规则：已知 `db.table` 先用 `table`；只知道词先 `table-search` 再 `table`；要 DDL、完整元数据、完整血缘、样例时才调用专项命令。
+## Permission And Subject Diagnostics
 
-## 任务、需求、子任务
-
-| 命令 | 默认字段/输出形态 | 什么时候选 | 不回答什么 |
+| Command | Default output | Choose when | Do not use it for |
 | --- | --- | --- | --- |
-| `task-sql` | `taskId` / `createSql` / `querySql` / `evidence_level` / `limitations` | 已知 Horae 任务号，要 SQL / ETL 证据 | 不证明任务实例运行成功，不证明数据正确 |
-| `demand-list` | 需求列表名片 | 按关键词、状态、负责人找需求候选 | 不读完整需求内容 |
-| `demand-detail` | 需求详情 | 已知需求 UUID，要读现状 | 不创建或推进需求 |
-| `demand-subtask-list` | 子任务列表 | 已知需求 UUID，要看下面有哪些子任务 | 不读单个子任务完整字段 |
-| `demand-subtask-detail` | 子任务详情 | 已知子任务 UUID，要读源表、数据源、状态等 | 不修改子任务 |
-| `demand-mine` | 我的需求列表 | 低频个人视图 | 不作为需求检索主入口 |
-| `demand-stats` | 状态统计、平均进度、接口人 TOP | 低频统计视图 | 不回答单个需求现状 |
-| `subtask-gather-create` | dry-run / save / submit 输出 | 明确授权后新建采集子任务 | 不在未读现状时直接写 |
-| `subtask-gather-update` | dry-run / save 输出 | 明确授权后修改采集子任务 | 不作为读详情入口 |
-| `subtask-modeling-create` | dry-run / save / submit 输出 | 明确授权后新建建模类子任务 | 不替代需求/子任务读回 |
+| `table-permission-mine` | User, table, status, matched source, validity | Current login user vs target table | Role or topic explanation |
+| `table-permission-topic` | Topic, table, conclusion, matched source | Scheduling topic vs target table | Current user permission |
+| `table-permission-role` | Role, table, conclusion, matched source | Role vs target table | Broad role inventory |
+| `role-list` | Role candidates | Need role id by role name | Table-permission verdict |
+| `role-user-list` | Role members | Need members of one role | Reverse user-to-role lookup |
+| `scheduling-topic-list-by-current-user` | Available scheduling topics | Need selectable topics | Topic table-permission verdict |
+| `scheduling-topic-base-policy` | Topic user base policy summary | Need policy explanation | Final table-permission verdict |
 
-固定链路：`demand-detail` -> `demand-subtask-list` / `demand-subtask-detail` -> dry-run -> `szdatatest` 验证 -> 用户明确授权 -> 才考虑 `szdata` 生产写入。
+## Dataset And Wide Table
 
-## 权限与主体诊断
-
-| 命令 | 默认输出 | 什么时候选 | 不该用它做什么 |
+| Command | Output rule | Choose when | Boundary |
 | --- | --- | --- | --- |
-| `table-permission-mine` | `user` / `table` / `status` / `matchedBy` / `validity` / `sourceTypes` / `roles` / `packages` | 当前登录用户能不能读某表 | 不回答角色或调度主题 |
-| `table-permission-topic` | `topicName` / `topicDesc` / `themeUser` / `table` / `conclusion` / `matchedBy` / `matched` / `source` / `validity` | 调度主题能不能读某表 | 不回答当前用户自身权限 |
-| `table-permission-role` | `roleId` / `roleName` / `table` / `conclusion` / `matchedBy` / `matched` / `source` | 指定角色能不能读某表 | 不做无目标表的大盘输出 |
-| `role-list` | `roleId` / `roleName` / `remark` / `itDemand` / `canApplyDataPerm` | 用角色名找 `roleId` | 不判断表权限 |
-| `role-user-list` | `roleId` / `roleName` / `counts` / `rows` | 看某个角色有哪些人 | 不是 user -> roles 反查 |
-| `scheduling-topic-list-by-current-user` | 当前用户可选调度主题 | 选择或确认主题 | 不判断主题能不能读表 |
-| `scheduling-topic-base-policy` | 主题用户基础策略摘要 | 解释主题基础策略 | 最终表权限仍走 `table-permission-topic` |
+| `dataset-config` | Filters empty values and `"-"` by default; SQL only by explicit preview/save flags | Read production/test dataset config | Does not save config |
+| `dataset-config-dict` | No raw by default | Check dictionaries such as usageType, dataType, sceneType | Does not parse SQL fields |
+| `dataset-sql-versions` | Version list first; SQL preview only when requested | Check SQL history/version diff | Does not prove task success |
+| `dataset-templates` | Template list first; SQL preview by id | Check dataset templates | Not ordinary config readback |
+| `dataset-indicator-sql` | Bounded SQL preview | Indicator-system wide-table SQL parameter investigation | Does not complete the full indicator selection flow |
+| `dataset-create-columns` | Test field parser | Parse SQL/table output fields before save | Does not save |
+| `dataset-create-guard-check` / `dataset-create` | Test guard/dry-run/explicit save | Validate ordinary SQL dataset creation in test | Blocks hidden usage 3/5 wide-table lifecycle writes |
+| `widetable` | Wide-table cards | Search wide tables or reverse lookup by task id | Does not read full schedule config |
+| `widetable-detail` | Generated wide-table detail | Known UUID/dataSetConfigId | Does not prove runtime success |
+| `widetable-action-log` | Bounded logs, raw only on request | Inspect flow logs | Not main entrypoint |
+| `widetable-schedule-detail` | Bounded SQL preview | Known Horae task id; read DispatchTaskConfig | Does not save schedule |
+| `widetable-schedule-config` | Bounded SQL preview | Known wide-table UUID; read local/upgrade config echo | Does not submit upgrade |
+| `wide-table-preview-test` / `wide-table-generate-test` / `wide-table-schedule-save-test` / `wide-table-schedule-validate` | `szdatatest`, explicit dry-run/read-only/execute semantics | Test wide-table lifecycle behavior | No production writes |
 
-归档/拒绝入口：`current-user-data-permission`、`my-permission-base`、`my-permission-data`、`my-permission-function`、`my-permission-report`、`role-data-permission`、`role-summary`、`scheduling-topic-table-check`、`table-permission-check`。
+## Support
 
-## 数据集读回与测试配置
-
-| 命令 | 输出规则 | 什么时候选 | 不回答什么 |
-| --- | --- | --- | --- |
-| `dataset-config` | 默认过滤空值和 `"-"`；列表/详情都有边界；SQL 只在指定预览或保存本地时展开 | 读生产/测试数据集配置、用途、宽表挂接、字段摘要 | 不保存平台配置 |
-| `dataset-config-dict` | 默认不返回 raw | 查 usageType、dataType、sceneType、businessOwnership 等字典 | 不解析 SQL 字段 |
-| `dataset-sql-versions` | 列表只给版本号/时间；指定版本或 compare 才给 SQL 预览 | 查 SQL 历史或版本对比 | 不代表任务运行成功 |
-| `dataset-templates` | 列表不吐完整 SQL/raw；指定 `--id` 才给 SQL 预览 | 查模板列表、模板详情 | 不作为普通数据集配置读回 |
-| `dataset-indicator-sql` | SQL 预览有边界 | 指标体系宽表 SQL 参数探查 | 不自动完成完整指标选择流程 |
-| `dataset-create-columns` | `szdatatest` 字段解析 | 写前解析 SQL/table 输出字段 | 不替代保存 |
-| `dataset-create-guard-check` / `dataset-create` | `szdatatest` guard / dry-run / 显式测试保存 | 普通 SQL 数据集测试验证 | usage 3/5 普通保存硬阻断，宽表走专门命令 |
-
-## 宽表管理
-
-| 命令 | 输出规则 | 什么时候选 | 不回答什么 |
-| --- | --- | --- | --- |
-| `widetable` | 宽表名片列表 | 搜宽表、用 task-id 反查 UUID/dataSetConfigId | 不读完整调度配置 |
-| `widetable-detail` | 宽表生成详情 | 已知 UUID 或 dataSetConfigId，要确认宽表定义 | 不证明任务实例成功 |
-| `widetable-explain` | 本地规则解释 | 看状态、按钮、场景、环境边界 | 不访问平台保存接口 |
-| `widetable-action-log` | 默认最多 20 行，`--raw` 才展开 raw | 看流转日志 | 不作为主入口，不默认 dump 全量日志 |
-| `widetable-schedule-detail` | SQL 预览有边界 | 已知 Horae task-id，要读 DispatchTaskConfig | 不保存调度 |
-| `widetable-schedule-config` | SQL 预览有边界 | 已知宽表 UUID，要读 local/upgrade 配置入口回显 | 不提交升级 |
-| `wide-table-preview-test` / `wide-table-generate-test` / `wide-table-schedule-save-test` / `wide-table-schedule-validate` | `szdatatest`，默认 dry-run 或 read-only，写入要显式确认 | 宽表测试生命周期验证 | 不做生产写入 |
-
-## 支撑入口
-
-| 命令 | 什么时候选 | 边界 |
+| Command | Choose when | Boundary |
 | --- | --- | --- |
-| `login` | 会话过期、401、token 异常 | 只辅助登录，不代表业务验证成功 |
-| `portal-help` | 查帮助中心内容 | 只读检索，不替代命令实测 |
+| `login` | Session expired, 401, token/session abnormal | Session helper only |
+| `portal-help` | Search Help Center content | Read-only help search, not command verification |
+| `sql-diagnosis` | Need direct Data Portal SQL risk/auth check | Partial MCP parity; missing-table diagnosis was not reproduced by the verified direct endpoint |
 
-## 本轮实测与收敛结果
+## Current Evidence Notes
 
-| 命令 | 调整前实测 | 调整后实测 | 结论 |
-| --- | ---: | ---: | --- |
-| `dataset-config --size 2` | 约 3.0KB | 约 1.3KB | 默认过滤空值和 `"-"` |
-| `dataset-sql-versions --id 17376` | 约 2.5KB | 约 1.2KB | 版本列表不再带空 SQL/raw 字段 |
-| `dataset-config-dict --dict dataType` | 646B | 422B | 默认不输出 raw |
-| `widetable-action-log --size 5` | 约 6.9KB 全量 | 约 0.9KB | 增加 `--size`，默认不输出 raw |
-| `subtask-access-point-list --size 3` | 621B，含端口 | 489B，不含 host/port | 隐藏连接细节 |
-| `table-permission-topic` | 456B | 335B | 来源/有效期压成短字段 |
-
-本轮没有执行任何生产写入。
+- The 2026-07-07 MCP coverage review is recorded in [szdata-operations/mcp-cli-coverage-report.md](./szdata-operations/mcp-cli-coverage-report.md).
+- `schedule-mcp-*` commands are explicit MCP-backed wrappers approved for schedule runtime parity.
+- The prior partial direct wrappers (`schedule-dependencies`, `schedule-run-instances`, `schedule-run-states`, `schedule-owner-failed-instances`, `schedule-run-logs`) were removed from active `szdata` discovery and archived on 2026-07-07.
+- `sql-diagnosis` is intentionally marked partial because the verified direct SQL exploration endpoint does not match MCP table-existence behavior.

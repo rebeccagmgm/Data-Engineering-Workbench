@@ -41,6 +41,15 @@ tmp/codex-thread-dashboard.md
 
 The dashboard path is local runtime state and is normally ignored by git.
 
+For `szdata sql-diagnosis` behavior, read:
+
+```text
+references/tools/szdata-operations/sql-diagnosis-behavior.md
+```
+
+Use it before making claims about SQL execution, table permissions, or the
+meaning of `valid=Y`.
+
 ## Environment Boundary
 
 - `szdata` is production and is read-only by default.
